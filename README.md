@@ -73,11 +73,28 @@ The server exposes two tools:
 
 The LLM uses `search` to discover operations, then writes code for `execute` to call them — no per-operation tool definitions needed.
 
-## Channel Server
+## Channel Plugin
 
-The channel server pushes inbound email events into a live Claude Code session and exposes tools for replying, drafting, triaging, and more.
+The channel server pushes inbound email events into a live Claude Code session and exposes tools for replying, drafting, triaging, and more. It can be installed as a Claude Code plugin or run standalone.
 
-### Start with channels
+### Install as a plugin
+
+Add the marketplace, install the plugin, then launch with the channel:
+
+```bash
+/plugin marketplace add glassBead-tc/agentmail-mcp-codemode
+/plugin install agentmail@agentmail-mcp-codemode
+```
+
+Then launch Claude Code with the channel enabled:
+
+```bash
+claude --dangerously-load-development-channels plugin:agentmail@agentmail-mcp-codemode
+```
+
+Run `/agentmail:setup` for guided configuration of API keys and webhooks.
+
+### Run standalone (development)
 
 ```bash
 # Start the HTTP server first
