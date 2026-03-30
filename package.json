@@ -4,6 +4,7 @@
     "description": "AgentMail MCP Server",
     "scripts": {
         "build": "tsc && chmod 755 build/index.js",
+        "start": "node build/index.js",
         "lint": "eslint .",
         "prettier": "prettier --write ."
     },
@@ -29,12 +30,14 @@
         "agentmail-mcp": "build/index.js"
     },
     "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.24.1",
+        "@modelcontextprotocol/sdk": "^1.28.0",
         "agentmail": "^0.4.10",
-        "agentmail-toolkit": "^0.2.7"
+        "agentmail-toolkit": "^0.2.7",
+        "express": "^5.2.1"
     },
     "devDependencies": {
         "@eslint/js": "^9.29.0",
+        "@types/express": "^5.0.6",
         "@types/node": "^24.0.1",
         "eslint": "^9.29.0",
         "eslint-config-prettier": "^10.1.5",
