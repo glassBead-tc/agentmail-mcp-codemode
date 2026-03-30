@@ -2,3 +2,5 @@
 /build/
 
 .env
+.mcp.json
+.env.local
