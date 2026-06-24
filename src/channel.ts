@@ -522,11 +522,42 @@ export function startChannel(): void {
         res.sendStatus(200)
     })
 
-    app.listen(CHANNEL_PORT, CHANNEL_HOST, () => {
+    const httpServer = app.listen(CHANNEL_PORT, CHANNEL_HOST, () => {
         console.error(
             `AgentMail channel webhook listener on http://${CHANNEL_HOST}:${CHANNEL_PORT}/webhook`
         )
     })
+
+    httpServer.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EADDRINUSE') {
+            console.error(
+                `Port ${CHANNEL_PORT} is already in use — a previous channel process is likely still ` +
+                    `running and holding it. Free it with \`kill $(lsof -t -i:${CHANNEL_PORT})\` and ` +
+                    `relaunch, or set CHANNEL_PORT to a different port.`
+            )
+        } else {
+            console.error('Channel webhook listener error:', err)
+        }
+        process.exit(1)
+    })
+
+    // -- Lifecycle: never outlive the parent (Claude Code) --
+    // The channel is spawned through an npm/sh chain, so on parent exit it can be
+    // reparented to init and keep squatting CHANNEL_PORT. StdioServerTransport only
+    // watches stdin for 'data'/'error', so it never notices the parent going away.
+    // Watch stdin for EOF ourselves and exit, releasing the port.
+    let shuttingDown = false
+    const shutdown = (reason: string): void => {
+        if (shuttingDown) return
+        shuttingDown = true
+        console.error(`AgentMail channel shutting down (${reason})`)
+        httpServer.close()
+        process.exit(0)
+    }
+    process.stdin.on('end', () => shutdown('parent disconnected'))
+    process.stdin.on('close', () => shutdown('parent disconnected'))
+    process.on('SIGTERM', () => shutdown('SIGTERM'))
+    process.on('SIGINT', () => shutdown('SIGINT'))
 
     // -- Stdio transport --
 
